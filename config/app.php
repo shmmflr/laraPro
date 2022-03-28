@@ -179,6 +179,11 @@ return [
 
         Ybazli\Faker\FakerServiceProvider::class,
 
+        /**
+         * Custom Providers
+         */
+        App\Providers\ObserverServiceProvider::class,
+
     ],
 
     /*

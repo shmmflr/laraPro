@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\LoginUser;
+use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,18 +18,26 @@ class PostController extends Controller
 
         event(new LoginUser($user));
         $posts = Post::all();
-        return view('posts', compact('posts'));
+        return view('post.index', compact('posts'));
 
     }
 
     public function create()
     {
-
+        return view('post.add');
     }
 
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        //
+        $data = [
+            'user_id' => auth()->user()->id,
+            'title' => $request->get('title'),
+            'body' => $request->get('body'),
+        ];
+
+        Post::query()->create($data);
+
+        return redirect()->back()->with('msg', 'مقاله با موفقست ایجاد شد');
     }
 
     public function show(Post $post)
