@@ -1,0 +1,47 @@
+@font-face {
+    font-family: "Vazir";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../plugins/fonts/Vazir.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Vazir Bold";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../plugins/fonts/Vazir-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Vazir Thin";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../plugins/fonts/Vazir-Thin.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Vazir Light";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../plugins/fonts/Vazir-Light.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Vazir Black";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../plugins/fonts/Vazir-Black.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Vazir Medium";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Vazir-Medium.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Material Icons";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../plugins/fonts/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2")
+        format("woff2");
+}
