@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\HelloJob;
+use App\Jobs\SendSmsJob;
+use App\Jobs\VeryfyEmailJob;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -69,6 +72,14 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
+        VeryfyEmailJob::dispatch($user)->onQueue('veryfy-email')
+            ->delay(now()->addSecond(30));
+
+        HelloJob::withChain([
+            new SendSmsJob($user),
+            new VeryfyEmailJob($user),
+        ])->dispatch($user);
 
         return $user;
     }
