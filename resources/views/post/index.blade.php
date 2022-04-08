@@ -5,6 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
           <a class="btn btn-info" href="{{route('posts.create')}}" > ایجاد پست جدید</a>
+          <a class="btn btn-info" href="{{route('mail')}}" >ارسال ایمیل</a>
         </div>
         <div class="col-md-8">
             <h1>

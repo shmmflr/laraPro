@@ -31,8 +31,8 @@ class TestJob implements ShouldQueue
      */
     public function handle()
     {
-        sleep(2);
-        throw new ('err');
+        sleep(10);
+        // throw new ('err');
         var_dump('hi');
     }
 
