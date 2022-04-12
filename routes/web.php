@@ -28,4 +28,5 @@ Route::group(['prefix' => 'panel', 'middleware' => 'auth'], function () {
     Route::get('/getMessage', [HomeController::class, 'getMessage']);
 
     Route::get('/mail', [HomeController::class, 'mail'])->name('mail');
+    Route::get('/mail-test', [HomeController::class, 'mailTest'])->name('mail.test');
 });

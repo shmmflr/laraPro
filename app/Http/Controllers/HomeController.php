@@ -96,4 +96,12 @@ class HomeController extends Controller
         dd('ok!!!');
 
     }
+
+    public function mailTest()
+    {
+        $data = ['name' => 'Mohammad Hossein'];
+
+        return new TestMail($data);
+
+    }
 }

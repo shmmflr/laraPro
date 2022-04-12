@@ -32,13 +32,13 @@ class TestMail extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->view('emails.test')
-            ->to('shmmflr98@gmail.com', 'این یک تست می باشد')
+            ->to('bubabesy@kellychibale-researchgroup-uct.com', 'این یک تست می باشد')
             ->subject('تمرین بخش ایمیل')
             ->with(['date' => '1401/01/19'])
             ->replyTo('shoeib.alinezhad70@gmail.com', 'shoeib')
-            ->attach(storage_path('app/public/test.txt'), [
-                'as' => 'faktor.txt',
-            ])
+        // ->attach(storage_path('app/public/test.txt'), [
+        //     'as' => 'faktor.txt',
+        // ])
         // ->attach(storage_path('app/public/helly-bisada.mp3'))
         ;
     }
