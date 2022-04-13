@@ -1,7 +1,9 @@
 <?php
 
+use Faker\Generator;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,14 +95,14 @@ Artisan::command('sho:test1', function () {
     $output->write('familim aazamye');
 });
 
-Artisan::command('wba:input1', function () {
+Artisan::command('sho:input1', function () {
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
     $name = $this->ask('Enater Your Name');
 
     $this->line("name is: <info>{$name}</info>");
 });
 
-Artisan::command('wba:input2', function () {
+Artisan::command('sho:input2', function () {
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
     $isMale = $this->confirm('Are You Male?', true);
     $gender = $isMale ? 'male' : 'female';
@@ -108,7 +110,7 @@ Artisan::command('wba:input2', function () {
     $this->line("your gender is: <info>{$gender}</info>");
 });
 
-Artisan::command('wba:input3', function () {
+Artisan::command('sho:input3', function () {
     //این دستور تو خط فرمان ویندوزی درست کار نمیکنه
     //به شما میاد autocomplete میده اما میتونید هر مقدار دیگه ای رو وارد کنید
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
@@ -117,7 +119,7 @@ Artisan::command('wba:input3', function () {
     $this->info("your gender is: <info>{$gender}</info>");
 });
 
-Artisan::command('wba:input4', function () {
+Artisan::command('sho:input4', function () {
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
 //    $gender = $this->choice('what is your gender?', ['male', 'female'], null, 2, true);
     $gender = $this->choice('what is your gender?', ['male', 'female']);
@@ -125,9 +127,101 @@ Artisan::command('wba:input4', function () {
     $this->info("your gender is: <info>{$gender}</info>");
 });
 
-Artisan::command('wba:input5', function () {
+Artisan::command('sho:input5', function () {
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
     $pass = $this->secret('enter your password');
 
     $this->line("your password is: <info>{$pass}</info>");
 });
+
+// create student project!!!!
+
+### Fake Data
+
+const STUDENTS_CACHE_KEY = 'STUDENTS_CACHE_KEY';
+
+Artisan::command('student:clear', function () {
+    Cache::forget(STUDENTS_CACHE_KEY);
+    $this->info('cache data is clear');
+})->describe('clear students');
+
+Artisan::command('student:seed {--c|count=10 : student count to seed into the cache}', function () {
+    $students = [];
+    $count = $this->option('count');
+    if (!is_numeric($count) || $count < 0) {
+        $count = 10;
+    }
+
+    $faker = app(Generator::class);
+    foreach (range(1, $count) as $index) {
+        $students[] = [
+            'id' => $index,
+            'name' => $faker->firstName,
+            'family' => $faker->lastName,
+            'age' => $faker->numberBetween(10, 30),
+            'term' => $faker->numberBetween(1, 4),
+        ];
+    }
+
+    Cache::forever(STUDENTS_CACHE_KEY, $students);
+    $this->info('create data is success');
+})->describe('seed students data');
+
+Artisan::command('student:list {--t|type=table : can either be table or array} {--l|limit=10 : limit output count}', function () {
+    $students = Cache::get(STUDENTS_CACHE_KEY);
+
+    if (empty($students)) {
+        /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+        return $this->info('students list is empty');
+    }
+
+    $limit = $this->option('limit');
+    if (!is_numeric($limit) || $limit < 0) {
+        $limit = 10;
+    }
+    $students = array_slice($students, 0, $limit);
+
+    if ($this->option('type') === 'table') {
+        return $this->table(['id', 'name', 'family', 'age', 'grade'], $students);
+    }
+
+    dd($students);
+})->describe('show students list');
+
+Artisan::command('student:add', function () {
+    /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+    $students = Cache::get(STUDENTS_CACHE_KEY, []);
+    $id = empty($students) ? 1 : end($students)['id'] + 1;
+
+    do {
+        if (isset($name)) {
+            $this->error('name is invalid enter a valid name with 2 more characters');
+        }
+        $name = $this->ask('Enter name', 'name is required');
+    } while ($name === 'name is required' || strlen($name) <= 1);
+
+    do {
+        if (isset($family)) {
+            $this->error('family is invalid enter a valid family with 2 more characters');
+        }
+        $family = $this->ask('Enter family', 'family is required');
+    } while ($family === 'family is required' || strlen($family) <= 1);
+
+    do {
+        if (isset($age)) {
+            $this->error('age is invalid enter a valid age between 10, 100');
+        }
+        $age = $this->ask('Enter age', 'age is required, between 10, 100');
+    } while ($age === 'age is required, between 10, 100' || !is_numeric($age) || $age < 10 || $age > 100);
+
+    do {
+        if (isset($term)) {
+            $this->error('term is invalid enter a valid term between 1, 4');
+        }
+        $term = $this->ask('Enter term', 'term is required, between 1, 4');
+    } while ($term === 'term is required, between 1, 4' || !is_numeric($term) || $term < 1 || $term > 4);
+
+    $students[] = compact('id', 'name', 'family', 'age', 'term');
+    Cache::forever(STUDENTS_CACHE_KEY, $students);
+    $this->info('add new data');
+})->describe('add new student');
