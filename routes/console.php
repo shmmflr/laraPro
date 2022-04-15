@@ -167,6 +167,7 @@ Artisan::command('student:seed {--c|count=10 : student count to seed into the ca
     $this->info('create data is success');
 })->describe('seed students data');
 
+## Show list
 Artisan::command('student:list {--t|type=table : can either be table or array} {--l|limit=10 : limit output count}', function () {
     $students = Cache::get(STUDENTS_CACHE_KEY);
 
@@ -188,6 +189,7 @@ Artisan::command('student:list {--t|type=table : can either be table or array} {
     dd($students);
 })->describe('show students list');
 
+## add student
 Artisan::command('student:add', function () {
     /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
     $students = Cache::get(STUDENTS_CACHE_KEY, []);
@@ -225,3 +227,113 @@ Artisan::command('student:add', function () {
     Cache::forever(STUDENTS_CACHE_KEY, $students);
     $this->info('add new data');
 })->describe('add new student');
+
+Artisan::command('student:remove {ids* : student ids to remove}', function ($ids) {
+    /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+    $students = Cache::get(STUDENTS_CACHE_KEY);
+    $filtered = array_filter($students, function ($item) use ($ids) {
+        return !in_array($item['id'], $ids);
+    });
+
+    if (count($students) === count($filtered)) {
+        return $this->getOutput()->error('no student found with given id!');
+    }
+
+    Cache::forever(STUDENTS_CACHE_KEY, $filtered);
+
+    $this->getOutput()->success('student removed successfully');
+})->describe('remove a student');
+
+## remove student
+
+Artisan::command('student:update {id : student id to update}', function ($id) {
+    /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+
+    $students = Cache::get(STUDENTS_CACHE_KEY);
+    $filtered = array_filter($students, function ($item) use ($id) {
+        return $item['id'] == $id;
+    });
+
+    if (empty($filtered)) {
+        return $this->getOutput()->error('student not found');
+    }
+
+    $key = array_first(array_keys($filtered));
+    $student = array_first($filtered);
+
+    do {
+        if (isset($name)) {
+            $this->error('name is invalid enter a valid name with 2 more characters');
+        }
+        $name = $this->ask('Enter name', $student['name']);
+    } while (strlen($name) <= 1);
+    $student['name'] = $name;
+
+    do {
+        if (isset($family)) {
+            $this->error('family is invalid enter a valid family with 2 more characters');
+        }
+        $family = $this->ask('Enter family', $student['family']);
+    } while (strlen($family) <= 1);
+    $student['family'] = $family;
+
+    do {
+        if (isset($age)) {
+            $this->error('age is invalid enter a valid age between 10, 100');
+        }
+        $age = $this->ask('Enter age', $student['age']);
+    } while (!is_numeric($age) || $age < 10 || $age > 100);
+    $student['age'] = $age;
+
+    do {
+        if (isset($term)) {
+            $this->error('term is invalid enter a valid term between 1, 4');
+        }
+        $term = $this->ask('Enter term', $student['term']);
+    } while (!is_numeric($term) || $term < 1 || $term > 4);
+    $student['term'] = $term;
+
+    $students[$key] = $student;
+    Cache::forever(STUDENTS_CACHE_KEY, $students);
+
+    $this->getOutput()->success("student {$id} has updated");
+})->describe('update student');
+
+## find student
+
+Artisan::command('student:find', function () {
+    /** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+
+    $students = Cache::get(STUDENTS_CACHE_KEY);
+
+    $search = [];
+    //اگر نام رو خاست جستجو بکنه این تو اضافه ش میکنم
+    $search['name'] = $this->ask('Enter name to search', null);
+    //اگر نام خانوادگی رو خاست جستجو بکنه این تو اضافه ش میکنم
+    $search['family'] = $this->ask('Enter family to search', null);
+    //اگر سن رو خاست جستجو بکنه این تو اضافه ش میکنم
+    $search['age'] = $this->ask('Enter age to search', null);
+    //اگر ترم رو خاست جستجو بکنه این تو اضافه ش میکنم
+    $search['term'] = $this->ask('Enter term to search', null);
+
+    //حذف خونه هایی که خالی هستند
+    $search = array_filter($search);
+
+    $filtered = array_filter($students, function ($item) use ($search) {
+        $match = 0;
+        foreach ($search as $key => $value) {
+            $itemValue = $item[$key];
+            if (strpos($itemValue, $value) !== false) {
+                $match++;
+            }
+        }
+
+        return $match === count($search);
+    });
+
+    if (empty($filtered)) {
+        return $this->getOutput()->error('no match found');
+    }
+
+    return $this->table(['id', 'name', 'family', 'age', 'term'], $filtered);
+})->describe('search in student list');
